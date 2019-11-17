@@ -1,5 +1,5 @@
-name: 'Create New Semantic Version'
-description: 'Create the next semantic version and tag it.'
+name: 'Create new Semantic Version'
+description: 'Determine the next semantic version and optionally tag it.'
 inputs:
   bump:
     description: 'The type of semantic version increment to make (one of major, premajor, minor, preminor, patch, prepatch, or prerelease)'
@@ -22,3 +22,6 @@ outputs:
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: 'tag'  
+  color: 'purple'
