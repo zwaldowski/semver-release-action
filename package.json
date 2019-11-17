@@ -1,16 +1,15 @@
 {
-  "name": "javascript-action",
+  "name": "semver-release-action",
   "version": "1.0.0",
-  "description": "JavaScript Action Template",
+  "description": "Create the next semantic version and tag it.",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint index.js",
     "package": "ncc build index.js -o dist",
-    "test": "eslint index.js && jest"
+    "test": "eslint index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/javascript-action.git"
+    "url": "git+https://github.com/zwaldowski/semver-release-action.git"
   },
   "keywords": [
     "GitHub",
@@ -20,15 +19,16 @@
   "author": "GitHub",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/actions/javascript-action/issues"
+    "url": "https://github.com/actions/semver-release-action/issues"
   },
-  "homepage": "https://github.com/actions/javascript-action#readme",
+  "homepage": "https://github.com/actions/semver-release-action#readme",
   "dependencies": {
-    "@actions/core": "^1.1.1"
+    "@actions/core": "^1.1.1",
+    "@actions/github": "^1.1.0",
+    "semver": "^6.3.0"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
-    "eslint": "^6.3.0",
-    "jest": "^24.9.0"
+    "eslint": "^6.6.0"
   }
 }

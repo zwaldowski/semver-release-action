@@ -1,13 +1,24 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: 'Create New Semantic Version'
+description: 'Create the next semantic version and tag it.'
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
+  bump:
+    description: 'The type of semantic version increment to make (one of major, premajor, minor, preminor, patch, prepatch, or prerelease)'
     required: true
-    default: '1000'
+  github_token:
+    description: 'Token to use to push to the repo. Pass in using `secrets.GITHUB_TOKEN`.'
+    required: true
+  dry_run:
+    description: 'If true, only calculate the new version and exit successfully.'
+    required: false
+    default: false
+  sha:
+    description: 'Commit SHA to use to create tag. Pass in if you modify the current HEAD.'
+    required: false
 outputs:
-  time: # output will be available to future steps 
-    description: 'The message to output'
+  version:
+    description: 'The new semantic version that was calculated.'
+  version_optimistic:
+    description: 'The major and minor components of the semantic version that was calculated.'
 runs:
   using: 'node12'
   main: 'dist/index.js'

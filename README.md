@@ -1,114 +1,54 @@
+# Semantic Versioning Release Action
 
-<p align="center">
-  <a href="https://github.com/actions/javascript-action"><img alt="GitHub Actions status" src="https://github.com/actions/javascript-action/workflows/test-local/badge.svg"></a>
-</p>
+This action locates the current version of the repository using its tags, increments it based on the inputs, then creates a tag for that new version at that current commit. Use it to automate the release deployment of a project.
 
-# Create a JavaScript Action
+## Inputs
 
-Use this template to bootstrap the creation of a JavaScript action.:rocket:
+### `bump`
 
-This template includes tests, linting, a validation workflow, publishing, and versioning guidance.  
+**Required** The type of semantic version increment to make. One of `major`, `premajor`, `minor`, `preminor`, `patch`, `prepatch`, or `prerelease`).
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+You may get this value from another action, such as zwaldowski/match-label-action.
 
-## Create an action from this template
+### `github_token`
 
-Click the `Use this Template` and provide the new repo details for your action
+**Required**. Used to make API requests for looking through and creating tags. Pass in using `secrets.GITHUB_TOKEN`.
 
-## Code in Master
+### `dry_run`
 
-Install the dependencies  
-```bash
-$ npm install
-```
+**Optional**. If true, only calculate the new version and exits successfully. Use this if you want to make additional changes using the version number before tagging. The calculated version number will automatically be used when this action gets re-run.
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+### `sha`
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+**Optional**. Override the commit hash used to create the version tag. Use this if you previously ran the action with `dry_run` and modified the tree.
 
-...
-```
+## Outputs
 
-## Change action.yml
+### `version`
 
-The action.yml contains defines the inputs and output for your action.
+The full version number produced by incrementing the semantic version number of the latest tag according to the `bump` input. For instance, given `12.4.1` and `bump: minor`, `12.5.0`.
 
-Update the action.yml with your name, description, inputs and outputs for your action.
+### `version_optimistic`
 
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
+The major and minor components of `version`. For instance, given `12.4.1` and `bump: minor`, `12.5`. Use for recommending a non-specific release to users, as in a `~>` declaration in a `Gemfile`.
 
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-const core = require('@actions/core');
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Package for distribution
-
-GitHub Actions will run the entry point from the action.yml. Packaging assembles the code into one file that can be checked in to Git, enabling fast and reliable execution and preventing the need to check in node_modules.
-
-Actions are run from GitHub repos.  Packaging the action will create a packaged action in the dist folder.
-
-Run package
-
-```bash
-npm run package
-```
-
-Since the packaged index.js is run from the dist folder.
-
-```bash
-git add dist
-```
-
-## Create a release branch
-
-Users shouldn't consume the action from master since that would be latest code and actions can break compatibility between major versions.
-
-Checkin to the v1 release branch
-
-```bash
-$ git checkout -b v1
-$ git commit -a -m "v1 release"
-```
-
-```bash
-$ git push origin v1
-```
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Usage
-
-You can now consume the action by referencing the v1 branch
+## Example usage
 
 ```yaml
-uses: actions/javascript-action@v1
-with:
-  milliseconds: 1000
+- id: next_version
+  uses: zwaldowski/match-label-action@v1
+  with:
+    bump: minor
+    dry_run: true
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+- run: echo "${{ steps.next_version.outputs.version }}"
 ```
 
-See the [actions tab](https://github.com/actions/javascript-action/actions) for runs of this action! :rocket:
+```yaml
+- id: git_commit
+  run: echo ::set-output name=sha::$(git rev-parse HEAD)
+- uses: zwaldowski/semver-release-action@v1
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    sha: ${{ steps.git_commit.outputs.sha }}
+```
