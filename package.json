@@ -19,9 +19,9 @@
   "author": "GitHub",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/actions/semver-release-action/issues"
+    "url": "https://github.com/zwaldowski/semver-release-action/issues"
   },
-  "homepage": "https://github.com/actions/semver-release-action#readme",
+  "homepage": "https://github.com/zwaldowski/semver-release-action#readme",
   "dependencies": {
     "@actions/core": "^1.1.1",
     "@actions/github": "^1.1.0",
