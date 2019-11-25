@@ -1,12 +1,12 @@
 # Semantic Versioning Release Action
 
-This action locates the current version of the repository using its tags, increments it based on the inputs, then creates a tag for that new version at that current commit. Use it to automate the release deployment of a project.
+This action locates the current version of the repository using its tags, increments it based on the inputs, then creates a tag for that new version at the current commit. Use it to automate the release deployment of a project.
 
 ## Inputs
 
 ### `bump`
 
-**Required** The type of semantic version increment to make. One of `major`, `premajor`, `minor`, `preminor`, `patch`, `prepatch`, or `prerelease`).
+**Required** The type of semantic version increment to make. One of `major`, `premajor`, `minor`, `preminor`, `patch`, `prepatch`, or `prerelease`.
 
 You may get this value from another action, such as zwaldowski/match-label-action.
 
@@ -16,7 +16,7 @@ You may get this value from another action, such as zwaldowski/match-label-actio
 
 ### `dry_run`
 
-**Optional**. If true, only calculate the new version and exits successfully. Use this if you want to make additional changes using the version number before tagging. The calculated version number will automatically be used when this action gets re-run.
+**Optional**. If true, only calculate the new version and exit successfully. Use this if you want to make additional changes using the version number before tagging. The calculated version number will automatically be used when this action gets re-run.
 
 ### `sha`
 
@@ -34,19 +34,39 @@ The major and minor components of `version`. For instance, given `12.4.1` and `b
 
 ## Example usage
 
-```yaml
-- id: next_version
-  uses: zwaldowski/match-label-action@v1
-  with:
-    bump: minor
-    dry_run: true
-    github_token: ${{ secrets.GITHUB_TOKEN }}
-- run: echo "${{ steps.next_version.outputs.version }}"
-```
+### Simple
+
+Create a version, f.ex., when merging to master.
 
 ```yaml
-- id: git_commit
-  run: echo ::set-output name=sha::$(git rev-parse HEAD)
+- id: bump
+  uses: zwaldowski/match-label-action@v1
+  with:
+    allowed: major,minor,patch
+- uses: zwaldowski/semver-release-action@v1
+  with:
+    bump: ${{ steps.bump.outputs.match }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Advanced
+
+Create a version and use the version to modify the repo, such as update a `README`. Run `semver-release-action` once to determine the version number and once to actually perform the release.
+
+```yaml
+- id: next_version
+  uses: zwaldowski/semver-release-action@v1
+    with:
+      dry_run: true
+      bump: ${{ … }}
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+// Do something to modify the repo using `${{ steps.next_version.outputs.version }}`.
+- run: echo "${{ steps.next_version.outputs.version }}"
+- run: |
+    git add .
+    git commit -m "Bump version"
+    git push
+    echo ::set-output name=sha::$(git rev-parse HEAD)
 - uses: zwaldowski/semver-release-action@v1
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
