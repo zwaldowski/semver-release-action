@@ -22,6 +22,10 @@ You may get this value from another action, such as zwaldowski/match-label-actio
 
 **Optional**. Override the commit hash used to create the version tag. Use this if you previously ran the action with `dry_run` and modified the tree.
 
+### `preid`
+
+**Optional**. 'Identifier to be used to prefix premajor, preminor, prepatch or prerelease version increments.
+
 ## Outputs
 
 ### `version`

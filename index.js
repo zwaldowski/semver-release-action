@@ -37,7 +37,8 @@ async function run() {
     if (version === null) {
       const bump = core.getInput('bump', { required: true })
       const latestTag = await mostRecentTag()
-      version = semver.inc(latestTag, bump)
+      const identifier = core.getInput('preid', { required: false })
+      version = semver.inc(latestTag, bump, identifier)
     }
 
     core.exportVariable('VERSION', version.toString())
