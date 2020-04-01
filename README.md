@@ -22,9 +22,13 @@ You may get this value from another action, such as zwaldowski/match-label-actio
 
 **Optional**. Override the commit hash used to create the version tag. Use this if you previously ran the action with `dry_run` and modified the tree.
 
+### `prefix`
+
+**Optional**. Version prefix used to create tag. Usually empty or `v` or `=`.
+
 ### `preid`
 
-**Optional**. 'Identifier to be used to prefix premajor, preminor, prepatch or prerelease version increments.
+**Optional**. 'Identifier to be used to prefix `premajor`, `preminor`, `prepatch` or `prerelease` version increments.
 
 ## Outputs
 
@@ -35,6 +39,10 @@ The full version number produced by incrementing the semantic version number of 
 ### `version_optimistic`
 
 The major and minor components of `version`. For instance, given `12.4.1` and `bump: minor`, `12.5`. Use for recommending a non-specific release to users, as in a `~>` declaration in a `Gemfile`.
+
+### `version_tag`
+
+The version string used to create the tag (the theoretical tag if `dry_run` is true).
 
 ## Example usage
 

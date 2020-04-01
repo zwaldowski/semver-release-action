@@ -23,7 +23,7 @@ async function createTag(version) {
   const token = core.getInput('github_token', { required: true })
   const octokit = new GitHub(token)
   const sha = core.getInput('sha') || context.sha
-  const ref = `refs/tags/${version.toString()}`
+  const ref = `refs/tags/${version}`
   await octokit.git.createRef({
     ...context.repo,
     ref,
@@ -33,20 +33,28 @@ async function createTag(version) {
 
 async function run() {
   try {
-    var version = semver.parse(process.env.VERSION)
+    let version = semver.parse(process.env.VERSION)
     if (version === null) {
       const bump = core.getInput('bump', { required: true })
       const latestTag = await mostRecentTag()
-      const identifier = core.getInput('preid', { required: false })
+      const identifier = core.getInput('preid', { required: false }) || ""
+      console.log(`Using latest tag "${latestTag.toString()}" with identifier "${identifier}"`)
       version = semver.inc(latestTag, bump, identifier)
     }
+
+    const prefix = core.getInput('prefix', {required: false}) || ""
+    let version_tag = prefix + version.toString()
+    console.log(`Using tag prefix "${prefix}"`)
 
     core.exportVariable('VERSION', version.toString())
     core.setOutput('version', version.toString())
     core.setOutput('version_optimistic', `${semver.major(version)}.${semver.minor(version)}`)
+    core.setOutput('version_tag', version_tag)
+
+    console.log(`Result: "${version.toString()}" (tag: "${version_tag}")`)
 
     if (core.getInput('dry_run') !== 'true') {
-      await createTag(version)
+      await createTag(version_tag)
     }
   } 
   catch (error) {
