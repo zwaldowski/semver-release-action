@@ -14,11 +14,21 @@ inputs:
   sha:
     description: 'Commit SHA to use to create tag. Pass in if you modify the current HEAD.'
     required: false
+  prefix:
+    description: 'Version prefix used to create tag. Usually empty or "v" or "=".'
+    required: false
+    default: ""
+  preid:
+    description: 'Identifier to be used to prefix premajor, preminor, prepatch or prerelease version increments.'
+    required: false
+    default: ""
 outputs:
   version:
     description: 'The new semantic version that was calculated.'
   version_optimistic:
     description: 'The major and minor components of the semantic version that was calculated.'
+  version_tag:
+    description: 'The version string used to create the tag.'
 runs:
   using: 'node12'
   main: 'dist/index.js'
