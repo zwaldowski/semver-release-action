@@ -8,7 +8,7 @@ This action locates the current version of the repository using its tags, incre
 
 **Required** The type of semantic version increment to make. One of `major`, `premajor`, `minor`, `preminor`, `patch`, `prepatch`, or `prerelease`.
 
-You may get this value from another action, such as zwaldowski/match-label-action.
+You may get this value from another action, such as [zwaldowski/match-label-action](https://github.com/zwaldowski/match-label-action).
 
 ### `github_token`
 
