@@ -28,7 +28,7 @@
     "semver": "^6.3.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "eslint": "^6.6.0"
+    "@zeit/ncc": "^0.22.1",
+    "eslint": "^6.8.0"
   }
 }
