@@ -1,8 +1,9 @@
 const core = require('@actions/core')
+const exec = require('@actions/exec');
 const {GitHub, context} = require('@actions/github')
 const semver = require('semver')
 
-async function getRepoTags() {
+async function getMostRecentRepoTag() {
   console.log('Getting list of tags from repository')
   const token = core.getInput('github_token', { required: true })
   const octokit = new GitHub(token)
@@ -12,30 +13,49 @@ async function getRepoTags() {
     namespace: 'tags/'
   })
 
-  return refs.map(ref => ref.ref.replace(/^refs\/tags\//g, ''), { loose: true })
-}
-
-async function getBranchTags(branch) {
-  console.log('Getting list of tags from branch: ${branch}')
-  return []
-}
-
-async function mostRecentTag() {
-  const branch = core.getInput('branch', { required: false })
-
-  let versions = []
-  if (!branch) {
-    versions = getRepoTags()
-  } else {
-    versions = getBranchTags(branch)
-  }
-
-  versions = versions
-    .map(v => semver.parse(v, { loose: true }))
+  const versions = refs
+    .map(ref => semver.parse(ref.ref.replace(/^refs\/tags\//g, ''), { loose: true }))
     .filter(version => version !== null)
     .sort(semver.rcompare)
 
   return versions[0] || semver.parse('0.0.0')
+}
+
+async function getMostRecentBranchTag(branch) {
+  console.log(`Getting list of tags from branch: ${branch}`)
+  let output = ''
+  let err = ''
+  const options = {}
+  options.listeners = {
+    stdout: (data) => {
+      output += data.toString()
+    },
+    stderr: (data) => {
+      err += data.toString()
+    }
+  };
+  options.cwd = './'
+  await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged', branch], options)
+  if (!err) {
+    console.log(err)
+  }
+  const versions = output.split("\n")
+    .map(tag => semver.parse(tag, { loose: true }))
+    .filter(version => version !== null)
+    .sort(semver.rcompare)
+
+  console.log(`Versions: ${versions}`)
+
+  return versions[0] || semver.parse('0.0.0')
+}
+
+async function mostRecentTag() {
+  const branch = core.getInput('branch', { required: false })
+  if (!branch) {
+    return getMostRecentRepoTag()
+  } else {
+    return getMostRecentBranchTag(branch)
+  }
 }
 
 async function createTag(version) {
