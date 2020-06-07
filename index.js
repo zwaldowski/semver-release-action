@@ -2,7 +2,8 @@ const core = require('@actions/core')
 const {GitHub, context} = require('@actions/github')
 const semver = require('semver')
 
-async function mostRecentTag() {
+async function getRepoTags() {
+  console.log('Getting list of tags from repository')
   const token = core.getInput('github_token', { required: true })
   const octokit = new GitHub(token)
 
@@ -11,8 +12,26 @@ async function mostRecentTag() {
     namespace: 'tags/'
   })
 
-  const versions = refs
-    .map(ref => semver.parse(ref.ref.replace(/^refs\/tags\//g, ''), { loose: true }))
+  return refs.map(ref => ref.ref.replace(/^refs\/tags\//g, ''), { loose: true })
+}
+
+async function getBranchTags(branch) {
+  console.log('Getting list of tags from branch: ${branch}')
+  return []
+}
+
+async function mostRecentTag() {
+  const branch = core.getInput('branch', { required: false })
+
+  let versions = []
+  if (!branch) {
+    versions = getRepoTags()
+  } else {
+    versions = getBranchTags(branch)
+  }
+
+  versions = versions
+    .map(v => semver.parse(v, { loose: true }))
     .filter(version => version !== null)
     .sort(semver.rcompare)
 
