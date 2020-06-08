@@ -2931,8 +2931,8 @@ async function getMostRecentRepoTag() {
   return versions[0] || semver.parse('0.0.0')
 }
 
-async function getMostRecentBranchTag(branch) {
-  console.log(`Getting list of tags from branch: ${branch}`)
+async function getMostRecentBranchTag() {
+  console.log(`Getting list of tags from branch`)
   let output = ''
   let err = ''
   const options = {}
@@ -2945,7 +2945,7 @@ async function getMostRecentBranchTag(branch) {
     }
   };
   options.cwd = './'
-  await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged', branch], options)
+  await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged'], options)
   if (!err) {
     console.log(err)
   }
@@ -2954,17 +2954,15 @@ async function getMostRecentBranchTag(branch) {
     .filter(version => version !== null)
     .sort(semver.rcompare)
 
-  console.log(`Versions: ${versions}`)
-
   return versions[0] || semver.parse('0.0.0')
 }
 
 async function mostRecentTag() {
-  const branch = core.getInput('branch', { required: false })
-  if (!branch) {
-    return getMostRecentRepoTag()
+  const perBranch = core.getInput('per_branch', { required: false })
+  if (perBranch) {
+    return getMostRecentBranchTag()
   } else {
-    return getMostRecentBranchTag(branch)
+    return getMostRecentRepoTag()
   }
 }
 
