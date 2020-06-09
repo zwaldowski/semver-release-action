@@ -35,9 +35,11 @@ async function getMostRecentBranchTag() {
     }
   };
   options.cwd = './'
+  await exec.exec(`/usr/bin/git`, ['fetch', '--tags', '--quiet'], options)
   await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged'], options)
   if (!err) {
     console.log(err)
+    process.exit(1)
   }
   const versions = output.split("\n")
     .map(tag => semver.parse(tag, { loose: true }))
