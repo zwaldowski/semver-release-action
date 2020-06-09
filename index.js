@@ -35,11 +35,15 @@ async function getMostRecentBranchTag() {
     }
   };
   options.cwd = './'
-  await exec.exec(`/usr/bin/git`, ['fetch', '--tags', '--quiet'], options)
-  await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged'], options)
-  if (!err) {
+  let exitCode = await exec.exec(`/usr/bin/git`, ['fetch', '--tags', '--quiet'], options)
+  if (exitCode != 0) {
     console.log(err)
-    process.exit(1)
+    process.exit(exitCode)
+  }
+  exitCode = await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged'], options)
+  if (exitCode != 0) {
+    console.log(err)
+    process.exit(exitCode)
   }
   const versions = output.split("\n")
     .map(tag => semver.parse(tag, { loose: true }))
