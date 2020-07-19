@@ -4,6 +4,10 @@ inputs:
   bump:
     description: 'The type of semantic version increment to make (one of major, premajor, minor, preminor, patch, prepatch, or prerelease)'
     required: true
+  per_branch:
+    description: 'If specified, only tags merged to the same branch will be considered. Useful for maintenance branches. Note: this requires fetching the history when checking out.'
+    required: false
+    default: false
   github_token:
     description: 'Token to use to push to the repo. Pass in using `secrets.GITHUB_TOKEN`.'
     required: true

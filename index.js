@@ -1,8 +1,10 @@
 const core = require('@actions/core')
+const exec = require('@actions/exec');
 const {GitHub, context} = require('@actions/github')
 const semver = require('semver')
 
-async function mostRecentTag() {
+async function getMostRecentRepoTag() {
+  console.log('Getting list of tags from repository')
   const token = core.getInput('github_token', { required: true })
   const octokit = new GitHub(token)
 
@@ -17,6 +19,47 @@ async function mostRecentTag() {
     .sort(semver.rcompare)
 
   return versions[0] || semver.parse('0.0.0')
+}
+
+async function getMostRecentBranchTag() {
+  console.log(`Getting list of tags from branch`)
+  let output = ''
+  let err = ''
+  const options = {}
+  options.listeners = {
+    stdout: (data) => {
+      output += data.toString()
+    },
+    stderr: (data) => {
+      err += data.toString()
+    }
+  };
+  options.cwd = './'
+  let exitCode = await exec.exec(`/usr/bin/git`, ['fetch', '--tags', '--quiet'], options)
+  if (exitCode != 0) {
+    console.log(err)
+    process.exit(exitCode)
+  }
+  exitCode = await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged'], options)
+  if (exitCode != 0) {
+    console.log(err)
+    process.exit(exitCode)
+  }
+  const versions = output.split("\n")
+    .map(tag => semver.parse(tag, { loose: true }))
+    .filter(version => version !== null)
+    .sort(semver.rcompare)
+
+  return versions[0] || semver.parse('0.0.0')
+}
+
+async function mostRecentTag() {
+  const perBranch = core.getInput('per_branch', { required: false })
+  if (perBranch) {
+    return getMostRecentBranchTag()
+  } else {
+    return getMostRecentRepoTag()
+  }
 }
 
 async function createTag(version) {
