@@ -34,13 +34,13 @@ async function getMostRecentBranchTag() {
       err += data.toString()
     }
   };
-  options.cwd = './'
-  let exitCode = await exec.exec(`/usr/bin/git`, ['fetch', '--tags', '--quiet'], options)
+  options.cwd = '.'
+  let exitCode = await exec.exec('git', ['fetch', '--tags', '--quiet'], options)
   if (exitCode != 0) {
     console.log(err)
     process.exit(exitCode)
   }
-  exitCode = await exec.exec(`/usr/bin/git`, ['tag', '--no-column', '--merged'], options)
+  exitCode = await exec.exec('git', ['tag', '--no-column', '--merged'], options)
   if (exitCode != 0) {
     console.log(err)
     process.exit(exitCode)
