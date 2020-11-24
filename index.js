@@ -55,7 +55,7 @@ async function getMostRecentBranchTag() {
 
 async function mostRecentTag() {
   const perBranch = core.getInput('per_branch', { required: false })
-  if (perBranch) {
+  if (perBranch === 'true') {
     return getMostRecentBranchTag()
   } else {
     return getMostRecentRepoTag()
