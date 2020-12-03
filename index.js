@@ -6,6 +6,7 @@ const semver = require('semver')
 async function getMostRecentRepoTag() {
   console.log('Getting list of tags from repository')
   const token = core.getInput('github_token', { required: true })
+  const prefix = core.getInput('prefix', {required: false}) || ""
   const octokit = github.getOctokit(token)
 
   const { data: refs } = await octokit.git.listMatchingRefs({
@@ -13,8 +14,10 @@ async function getMostRecentRepoTag() {
     namespace: 'tags/'
   })
 
+  const prx = new RegExp(`^${prefix}`,'g');
   const versions = refs
-    .map(ref => semver.parse(ref.ref.replace(/^refs\/tags\//g, ''), { loose: true }))
+    .map(ref => ref.ref.replace(/^refs\/tags\//g, '').replace(prx, ''))
+    .map(tag => semver.parse(tag, { loose: true }))
     .filter(version => version !== null)
     .sort(semver.rcompare)
 
@@ -45,8 +48,10 @@ async function getMostRecentBranchTag() {
     console.log(err)
     process.exit(exitCode)
   }
+  const prefix = core.getInput('prefix', {required: false}) || ""
+  const prx = new RegExp(`^${prefix}`,'g');
   const versions = output.split("\n")
-    .map(tag => semver.parse(tag, { loose: true }))
+    .map(tag => semver.parse(tag.replace(prx, ''), { loose: true }))
     .filter(version => version !== null)
     .sort(semver.rcompare)
 
