@@ -11,7 +11,7 @@ async function getMostRecentRepoTag() {
 
   const { data: refs } = await octokit.git.listMatchingRefs({
     ...github.context.repo,
-    namespace: 'tags/'
+    ref: 'tags/'
   })
 
   const prx = new RegExp(`^${prefix}`,'g');
