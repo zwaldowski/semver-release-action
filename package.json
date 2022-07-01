@@ -1,6 +1,6 @@
 {
   "name": "semver-release-action",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Create the next semantic version and tag it.",
   "main": "index.js",
   "scripts": {
