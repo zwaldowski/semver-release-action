@@ -78,7 +78,7 @@ Create a version and use the version to modify the repo, such as update a `READM
     git add .
     git commit -m "Bump version"
     git push
-    echo ::set-output name=sha::$(git rev-parse HEAD)
+    echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 - uses: zwaldowski/semver-release-action@v1
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
