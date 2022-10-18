@@ -1,6 +1,6 @@
 {
   "name": "semver-release-action",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Create the next semantic version and tag it.",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/zwaldowski/semver-release-action#readme",
   "dependencies": {
-    "@actions/core": "^1.9.1",
+    "@actions/core": "^1.10.0",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
     "semver": "^6.3.0"
