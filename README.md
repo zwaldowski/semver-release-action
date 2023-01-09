@@ -22,6 +22,14 @@ You may get this value from another action, such as [zwaldowski/match-label-acti
 
 **Optional**. Override the commit hash used to create the version tag. Use this if you previously ran the action with `dry_run` and modified the tree.
 
+### `per_branch`
+
+**Optional**. If true, only tags merged to the same branch will be considered. Useful for maintenance branches.
+
+> **Note**
+>
+> This requires fetching the history when checking out.
+
 ### `prefix`
 
 **Optional**. Version prefix used to create tag. Usually empty or `v` or `=`.
