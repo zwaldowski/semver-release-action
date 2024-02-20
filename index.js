@@ -9,7 +9,7 @@ async function getMostRecentRepoTag() {
   const prefix = core.getInput('prefix', {required: false}) || ""
   const octokit = github.getOctokit(token)
 
-  const { data: refs } = await octokit.git.listMatchingRefs({
+  const { data: refs } = await octokit.rest.git.listMatchingRefs({
     ...github.context.repo,
     ref: 'tags/'
   })
@@ -72,7 +72,7 @@ async function createTag(version) {
   const octokit = github.getOctokit(token)
   const sha = core.getInput('sha') || github.context.sha
   const ref = `refs/tags/${version}`
-  await octokit.git.createRef({
+  await octokit.rest.git.createRef({
     ...github.context.repo,
     ref,
     sha
