@@ -1,113 +1,112 @@
-const core = require('@actions/core')
-const exec = require('@actions/exec');
-const github = require('@actions/github')
-const semver = require('semver')
+import {env} from 'node:process'
+import {exportVariable, getInput, setFailed, setOutput} from '@actions/core'
+import {exec} from '@actions/exec'
+import {context, getOctokit} from '@actions/github'
+import {coerce, inc, major, minor, parse, rcompare} from 'semver'
 
 async function getMostRecentRepoTag() {
   console.log('Getting list of tags from repository')
-  const token = core.getInput('github_token', { required: true })
-  const prefix = core.getInput('prefix', {required: false}) || ""
-  const octokit = github.getOctokit(token)
+  const token = getInput('github_token', {required: true})
+  const prefix = getInput('prefix', {required: false}) || ''
+  const octokit = getOctokit(token)
 
-  const { data: refs } = await octokit.rest.git.listMatchingRefs({
-    ...github.context.repo,
+  const {data: refs} = await octokit.rest.git.listMatchingRefs({
+    ...context.repo,
     ref: 'tags/'
   })
 
-  const prx = new RegExp(`^${prefix}`,'g');
+  const prx = new RegExp(`^${prefix}`, 'g')
   const versions = refs
-    .map(ref => ref.ref.replace(/^refs\/tags\//g, '').replace(prx, ''))
-    .map(tag => semver.parse(tag, { loose: true }))
-    .filter(version => version !== null)
-    .sort(semver.rcompare)
+    .map((ref) => ref.ref.replaceAll(/^refs\/tags\//g, '').replace(prx, ''))
+    .map((tag) => coerce(tag, {loose: true}))
+    .filter((version) => version !== null)
+    .sort(rcompare)
 
-  return versions[0] || semver.parse('0.0.0')
+  return versions[0] || parse('0.0.0')
 }
 
 async function getMostRecentBranchTag() {
   console.log(`Getting list of tags from branch`)
   let output = ''
-  let err = ''
+  let error = ''
   const options = {}
   options.listeners = {
-    stdout: (data) => {
+    stdout(data) {
       output += data.toString()
     },
-    stderr: (data) => {
-      err += data.toString()
+    stderr(data) {
+      error += data.toString()
     }
-  };
+  }
   options.cwd = '.'
-  let exitCode = await exec.exec('git', ['fetch', '--tags', '--quiet'], options)
-  if (exitCode != 0) {
-    console.log(err)
-    process.exit(exitCode)
+  let exitCode = await exec('git', ['fetch', '--tags', '--quiet'], options)
+  if (exitCode !== 0) {
+    throw new Error(error)
   }
-  exitCode = await exec.exec('git', ['tag', '--no-column', '--merged'], options)
-  if (exitCode != 0) {
-    console.log(err)
-    process.exit(exitCode)
-  }
-  const prefix = core.getInput('prefix', {required: false}) || ""
-  const prx = new RegExp(`^${prefix}`,'g');
-  const versions = output.split("\n")
-    .map(tag => semver.parse(tag.replace(prx, ''), { loose: true }))
-    .filter(version => version !== null)
-    .sort(semver.rcompare)
 
-  return versions[0] || semver.parse('0.0.0')
+  exitCode = await exec('git', ['tag', '--no-column', '--merged'], options)
+  if (exitCode !== 0) {
+    throw new Error(error)
+  }
+
+  const prefix = getInput('prefix', {required: false}) || ''
+  const prx = new RegExp(`^${prefix}`, 'g')
+  const versions = output
+    .split('\n')
+    .map((tag) => coerce(tag.replace(prx, ''), {loose: true}))
+    .filter((version) => version !== null)
+    .sort(rcompare)
+
+  return versions[0] || parse('0.0.0')
 }
 
 async function mostRecentTag() {
-  const perBranch = core.getInput('per_branch', { required: false })
+  const perBranch = getInput('per_branch', {required: false})
   if (perBranch === 'true') {
     return getMostRecentBranchTag()
-  } else {
-    return getMostRecentRepoTag()
   }
+
+  return getMostRecentRepoTag()
 }
 
 async function createTag(version) {
-  const token = core.getInput('github_token', { required: true })
-  const octokit = github.getOctokit(token)
-  const sha = core.getInput('sha') || github.context.sha
+  const token = getInput('github_token', {required: true})
+  const octokit = getOctokit(token)
+  const sha = getInput('sha') || context.sha
   const ref = `refs/tags/${version}`
   await octokit.rest.git.createRef({
-    ...github.context.repo,
+    ...context.repo,
     ref,
     sha
   })
 }
 
-async function run() {
-  try {
-    let version = semver.parse(process.env.VERSION)
-    if (version === null) {
-      const bump = core.getInput('bump', { required: true })
-      const latestTag = await mostRecentTag()
-      const identifier = core.getInput('preid', { required: false }) || ""
-      console.log(`Using latest tag "${latestTag.toString()}" with identifier "${identifier}"`)
-      version = semver.inc(latestTag, bump, identifier)
-    }
-
-    const prefix = core.getInput('prefix', {required: false}) || ""
-    let version_tag = prefix + version.toString()
-    console.log(`Using tag prefix "${prefix}"`)
-
-    core.exportVariable('VERSION', version.toString())
-    core.setOutput('version', version.toString())
-    core.setOutput('version_optimistic', `${semver.major(version)}.${semver.minor(version)}`)
-    core.setOutput('version_tag', version_tag)
-
-    console.log(`Result: "${version.toString()}" (tag: "${version_tag}")`)
-
-    if (core.getInput('dry_run') !== 'true') {
-      await createTag(version_tag)
-    }
+try {
+  let version = parse(env.VERSION)
+  if (version === null) {
+    const bump = getInput('bump', {required: true})
+    const latestTag = await mostRecentTag()
+    const identifier = getInput('preid', {required: false}) || ''
+    console.log(
+      `Using latest tag "${latestTag.toString()}" with identifier "${identifier}"`
+    )
+    version = inc(latestTag, bump, identifier)
   }
-  catch (error) {
-    core.setFailed(error.message)
+
+  const prefix = getInput('prefix', {required: false}) || ''
+  const versionTag = prefix + version.toString()
+  console.log(`Using tag prefix "${prefix}"`)
+
+  exportVariable('VERSION', version.toString())
+  setOutput('version', version.toString())
+  setOutput('version_optimistic', `${major(version)}.${minor(version)}`)
+  setOutput('version_tag', versionTag)
+
+  console.log(`Result: "${version.toString()}" (tag: "${versionTag}")`)
+
+  if (getInput('dry_run') !== 'true') {
+    await createTag(versionTag)
   }
+} catch (error) {
+  setFailed(error.message)
 }
-
-run()
