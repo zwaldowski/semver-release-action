@@ -60,10 +60,10 @@ Create a version, f.ex., when merging to master.
 
 ```yaml
 - id: bump
-  uses: zwaldowski/match-label-action@v4
+  uses: zwaldowski/match-label-action@v6
   with:
     allowed: major,minor,patch
-- uses: zwaldowski/semver-release-action@v3
+- uses: zwaldowski/semver-release-action@v4
   with:
     bump: ${{ steps.bump.outputs.match }}
     github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -75,7 +75,7 @@ Create a version and use the version to modify the repo, such as update a `READM
 
 ```yaml
 - id: next_version
-  uses: zwaldowski/semver-release-action@v3
+  uses: zwaldowski/semver-release-action@v4
     with:
       dry_run: true
       bump: ${{ … }}
