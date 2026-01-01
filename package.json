@@ -1,11 +1,11 @@
 {
   "name": "semver-release-action",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Create the next semantic version and tag it.",
   "main": "index.js",
   "scripts": {
     "package": "ncc build index.js -o dist",
-    "test": "eslint index.js"
+    "test": "xo"
   },
   "repository": {
     "type": "git",
@@ -23,13 +23,25 @@
   },
   "homepage": "https://github.com/zwaldowski/semver-release-action#readme",
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/exec": "^1.0.4",
+    "@actions/core": "^2.0.0",
+    "@actions/exec": "^2.0.0",
     "@actions/github": "^6.0.0",
-    "semver": "^7.6.0"
+    "semver": "^7.7.0"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.1",
-    "eslint": "^8.56.0"
+    "@vercel/ncc": "^0.38.4",
+    "xo": "^1.2.3"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "none"
+  },
+  "type": "module",
+  "xo": {
+    "prettier": true,
+    "semicolon": false,
+    "space": true
   }
 }

@@ -3,11 +3,20 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - run: npm ci
-    - run: npm test
+      - uses: actions/checkout@v6
+      - run: npm ci
+      - run: npm test
+      - name: Self-test
+        id: semver
+        uses: ./
+        with:
+          bump: patch
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dry_run: true
+      - name: Output version
+        run: echo "New version is ${{ steps.semver.outputs.version }}"
